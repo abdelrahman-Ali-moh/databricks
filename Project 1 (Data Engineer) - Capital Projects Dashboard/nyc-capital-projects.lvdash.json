@@ -1,0 +1,865 @@
+{
+  "datasets": [
+    {
+      "name": "0744d23f",
+      "displayName": "ds_kpis",
+      "queryLines": [
+        "SELECT * FROM workspace.gold.project_kpis"
+      ],
+      "columns": [
+        {
+          "displayName": "Red Projects",
+          "description": "Count of projects with risk_status = 'Red'",
+          "expression": "COUNT_IF(`risk_status` = 'Red')"
+        }
+      ]
+    },
+    {
+      "name": "33d6ad88",
+      "displayName": "ds_agency",
+      "queryLines": [
+        "SELECT * FROM workspace.gold.agency_summary"
+      ]
+    },
+    {
+      "name": "360a6271",
+      "displayName": "ds_trend",
+      "queryLines": [
+        "SELECT * FROM workspace.gold.monthly_trend"
+      ]
+    },
+    {
+      "name": "agency_top15_budget",
+      "displayName": "Top 15 Agencies by Budget",
+      "config": {
+        "version": "1.1",
+        "source": "SELECT agency, budget_m, spend_m FROM workspace.gold.agency_summary ORDER BY budget_m DESC LIMIT 15\n",
+        "dimensions": [
+          {
+            "expr": "agency"
+          }
+        ],
+        "measures": [
+          {
+            "name": "budget_m",
+            "expr": "SUM(budget_m)"
+          },
+          {
+            "name": "spend_m",
+            "expr": "SUM(spend_m)"
+          }
+        ]
+      }
+    }
+  ],
+  "pages": [
+    {
+      "name": "45fe8e75",
+      "displayName": "Overview",
+      "layout": [
+        {
+          "widget": {
+            "name": "counter_total_budget",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0744d23f",
+                  "fields": [
+                    {
+                      "name": "sum(budget_usd)",
+                      "expression": "SUM(`budget_usd`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Total Budget"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(budget_usd)",
+                  "format": {
+                    "abbreviation": "compact",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "max"
+                    },
+                    "type": "number-currency"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "counter_total_spend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0744d23f",
+                  "fields": [
+                    {
+                      "name": "sum(spend_usd)",
+                      "expression": "SUM(`spend_usd`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Total Spend",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(spend_usd)",
+                  "format": {
+                    "abbreviation": "compact",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "max"
+                    },
+                    "type": "number-currency"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 3,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "d670bf0c",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "agency_top15_budget",
+                  "fields": [
+                    {
+                      "name": "agency",
+                      "expression": "`agency`"
+                    },
+                    {
+                      "name": "measure(budget_m)",
+                      "expression": "MEASURE(`budget_m`)"
+                    },
+                    {
+                      "name": "measure(spend_m)",
+                      "expression": "MEASURE(`spend_m`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Top 15 Agencies by Budget",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "layout": "group"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "agency",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fields": [
+                    {
+                      "fieldName": "measure(budget_m)",
+                      "displayName": "Budget ($M)"
+                    },
+                    {
+                      "fieldName": "measure(spend_m)",
+                      "displayName": "Spend ($M)"
+                    }
+                  ],
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 5,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "filter_agency",
+            "queries": [
+              {
+                "name": "dashboards/01f1e113349d1d27af764009efa1b7e5/datasets/01f1e113481310d9896ac856338f5982_agency",
+                "query": {
+                  "datasetName": "0744d23f",
+                  "fields": [
+                    {
+                      "name": "agency",
+                      "expression": "`agency`"
+                    },
+                    {
+                      "name": "agency_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1e113349d1d27af764009efa1b7e5/datasets/01f1e1137ed81199bd36c227af99b6d3_agency",
+                "query": {
+                  "datasetName": "33d6ad88",
+                  "fields": [
+                    {
+                      "name": "agency",
+                      "expression": "`agency`"
+                    },
+                    {
+                      "name": "agency_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1e113349d1d27af764009efa1b7e5/datasets/01f1e114c54c155e92baa1806650752f_agency",
+                "query": {
+                  "datasetName": "agency_top15_budget",
+                  "fields": [
+                    {
+                      "name": "agency",
+                      "expression": "`agency`"
+                    },
+                    {
+                      "name": "agency_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "scale": {
+                "sort": {
+                  "by": "natural-order"
+                },
+                "type": "categorical"
+              },
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Agency"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "agency",
+                    "queryName": "dashboards/01f1e113349d1d27af764009efa1b7e5/datasets/01f1e113481310d9896ac856338f5982_agency"
+                  },
+                  {
+                    "fieldName": "agency",
+                    "queryName": "dashboards/01f1e113349d1d27af764009efa1b7e5/datasets/01f1e1137ed81199bd36c227af99b6d3_agency"
+                  },
+                  {
+                    "fieldName": "agency",
+                    "queryName": "dashboards/01f1e113349d1d27af764009efa1b7e5/datasets/01f1e114c54c155e92baa1806650752f_agency"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "filter_phase",
+            "queries": [
+              {
+                "name": "dashboards/01f1e113349d1d27af764009efa1b7e5/datasets/01f1e113481310d9896ac856338f5982_phase",
+                "query": {
+                  "datasetName": "0744d23f",
+                  "fields": [
+                    {
+                      "name": "phase",
+                      "expression": "`phase`"
+                    },
+                    {
+                      "name": "phase_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "scale": {
+                "sort": {
+                  "by": "natural-order"
+                },
+                "type": "categorical"
+              },
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Phase"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "phase",
+                    "queryName": "dashboards/01f1e113349d1d27af764009efa1b7e5/datasets/01f1e113481310d9896ac856338f5982_phase"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 0,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "filter_risk_status",
+            "queries": [
+              {
+                "name": "dashboards/01f1e113349d1d27af764009efa1b7e5/datasets/01f1e113481310d9896ac856338f5982_risk_status",
+                "query": {
+                  "datasetName": "0744d23f",
+                  "fields": [
+                    {
+                      "name": "risk_status",
+                      "expression": "`risk_status`"
+                    },
+                    {
+                      "name": "risk_status_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "scale": {
+                "sort": {
+                  "by": "natural-order"
+                },
+                "type": "categorical"
+              },
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Risk Status"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "risk_status",
+                    "queryName": "dashboards/01f1e113349d1d27af764009efa1b7e5/datasets/01f1e113481310d9896ac856338f5982_risk_status"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 0,
+            "width": 4,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "line_monthly_trend",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "360a6271",
+                  "fields": [
+                    {
+                      "name": "month",
+                      "expression": "`month`"
+                    },
+                    {
+                      "name": "sum(total_budget_m)",
+                      "expression": "SUM(`total_budget_m`)"
+                    },
+                    {
+                      "name": "sum(total_spend_m)",
+                      "expression": "SUM(`total_spend_m`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Monthly Budget vs Spend"
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "month",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fields": [
+                    {
+                      "fieldName": "sum(total_budget_m)",
+                      "displayName": "Budget ($M)"
+                    },
+                    {
+                      "fieldName": "sum(total_spend_m)",
+                      "displayName": "Spend ($M)"
+                    }
+                  ],
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 5,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "counter_red_projects",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0744d23f",
+                  "fields": [
+                    {
+                      "name": "measure(Red Projects)",
+                      "expression": "MEASURE(`Red Projects`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Red Projects"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(Red Projects)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 3,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "counter_avg_delay",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0744d23f",
+                  "fields": [
+                    {
+                      "name": "avg(delay_days)",
+                      "expression": "AVG(`delay_days`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Avg Delay (days)"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg(delay_days)",
+                  "format": {
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "max"
+                    },
+                    "type": "number-plain"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 3,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_phase_delay",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "0744d23f",
+                  "fields": [
+                    {
+                      "name": "phase",
+                      "expression": "`phase`"
+                    },
+                    {
+                      "name": "avg(delay_days)",
+                      "expression": "AVG(`delay_days`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Avg Delay by Phase"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "phase",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(delay_days)",
+                  "displayName": "Avg delay (days)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_agency_growth",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "33d6ad88",
+                  "fields": [
+                    {
+                      "name": "count(agency)",
+                      "expression": "COUNT(`agency`)"
+                    },
+                    {
+                      "name": "avg(avg_budget_growth_pct)",
+                      "expression": "AVG(`avg_budget_growth_pct`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Avg Budget Growth by Agency",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "count(agency)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg(avg_budget_growth_pct)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "max"
+                    },
+                    "type": "number-percent"
+                  },
+                  "displayName": "Avg budget growth",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 11,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "risk_trends",
+      "displayName": "Risk & Trends",
+      "pageType": "PAGE_TYPE_CANVAS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "canvasBackgroundColor": {
+        "light": "#EBEBEB",
+        "dark": "#EBEBEB"
+      },
+      "widgetBackgroundColor": {
+        "light": "#FCFCFD",
+        "dark": "#FCFCFD"
+      },
+      "widgetBorderColor": {
+        "light": "#FCFCFD",
+        "dark": "#FCFCFD"
+      },
+      "selectionColor": {
+        "light": "#2272B4",
+        "dark": "#2272B4"
+      },
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED",
+      "fontSettings": {
+        "base": {
+          "fontColor": {
+            "light": "#08141A",
+            "dark": "#08141A"
+          }
+        }
+      },
+      "visualizationColorMappings": [
+        {
+          "value": "Green",
+          "color": "#2FA84F"
+        },
+        {
+          "value": "Amber",
+          "color": "#E8A33D"
+        },
+        {
+          "value": "Red",
+          "color": "#D9534F"
+        }
+      ]
+    },
+    "applyModeEnabled": false
+  },
+  "bookmarks": [
+    {
+      "name": "8930dacd",
+      "displayName": "All Projects",
+      "widgetSelections": [
+        {
+          "pageName": "45fe8e75",
+          "widgetName": "filter_agency",
+          "selectionJson": "{\"kind\":\"operator\",\"operator\":\"and\",\"args\":[]}"
+        },
+        {
+          "pageName": "45fe8e75",
+          "widgetName": "filter_phase",
+          "selectionJson": "{\"kind\":\"operator\",\"operator\":\"and\",\"args\":[]}"
+        },
+        {
+          "pageName": "45fe8e75",
+          "widgetName": "filter_risk_status",
+          "selectionJson": "{\"kind\":\"operator\",\"operator\":\"and\",\"args\":[]}"
+        }
+      ]
+    },
+    {
+      "name": "f4b24964",
+      "displayName": "Construction Phase",
+      "widgetSelections": [
+        {
+          "pageName": "45fe8e75",
+          "widgetName": "filter_agency",
+          "selectionJson": "{\"kind\":\"operator\",\"operator\":\"and\",\"args\":[]}"
+        },
+        {
+          "pageName": "45fe8e75",
+          "widgetName": "filter_phase",
+          "selectionJson": "{\"kind\":\"values\",\"dataType\":\"string\",\"values\":[\"Construction\"]}"
+        },
+        {
+          "pageName": "45fe8e75",
+          "widgetName": "filter_risk_status",
+          "selectionJson": "{\"kind\":\"operator\",\"operator\":\"and\",\"args\":[]}"
+        }
+      ]
+    },
+    {
+      "name": "e22de38e",
+      "displayName": "Red Projects Only",
+      "widgetSelections": [
+        {
+          "pageName": "45fe8e75",
+          "widgetName": "filter_agency",
+          "selectionJson": "{\"kind\":\"operator\",\"operator\":\"and\",\"args\":[]}"
+        },
+        {
+          "pageName": "45fe8e75",
+          "widgetName": "filter_phase",
+          "selectionJson": "{\"kind\":\"operator\",\"operator\":\"and\",\"args\":[]}"
+        },
+        {
+          "pageName": "45fe8e75",
+          "widgetName": "filter_risk_status",
+          "selectionJson": "{\"kind\":\"values\",\"dataType\":\"string\",\"values\":[\"Red\"]}"
+        }
+      ]
+    },
+    {
+      "name": "dccc44e8",
+      "displayName": "Amber Watchlist",
+      "widgetSelections": [
+        {
+          "pageName": "45fe8e75",
+          "widgetName": "filter_agency",
+          "selectionJson": "{\"kind\":\"operator\",\"operator\":\"and\",\"args\":[]}"
+        },
+        {
+          "pageName": "45fe8e75",
+          "widgetName": "filter_phase",
+          "selectionJson": "{\"kind\":\"operator\",\"operator\":\"and\",\"args\":[]}"
+        },
+        {
+          "pageName": "45fe8e75",
+          "widgetName": "filter_risk_status",
+          "selectionJson": "{\"kind\":\"values\",\"dataType\":\"string\",\"values\":[\"Amber\"]}"
+        }
+      ]
+    }
+  ]
+}
