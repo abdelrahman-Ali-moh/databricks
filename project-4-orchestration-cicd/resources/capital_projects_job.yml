@@ -1,0 +1,51 @@
+resources:
+  jobs:
+    capital_projects_pipeline:
+      name: capital-projects-pipeline-${bundle.target}
+      max_concurrent_runs: 1
+
+      schedule:
+        quartz_cron_expression: "0 0 6 * * ?"
+        timezone_id: "Asia/Riyadh"
+        pause_status: ${var.schedule_status}
+
+      email_notifications:
+        on_failure:
+          - ${var.alert_email}
+
+      parameters:
+        - name: run_label
+          default: scheduled
+
+      tasks:
+        - task_key: bronze
+          notebook_task:
+            notebook_path: ../notebooks/03_bronze.py
+          max_retries: 1
+
+        - task_key: silver
+          depends_on:
+            - task_key: bronze
+          notebook_task:
+            notebook_path: ../notebooks/04_silver.py
+
+        - task_key: gold
+          depends_on:
+            - task_key: silver
+          notebook_task:
+            notebook_path: ../notebooks/05_gold.py
+
+        - task_key: quality_checks
+          depends_on:
+            - task_key: gold
+          notebook_task:
+            notebook_path: ../notebooks/06_quality_checks.py
+
+        - task_key: log_run
+          depends_on:
+            - task_key: quality_checks
+          notebook_task:
+            notebook_path: ../notebooks/07_log_run.py
+            base_parameters:
+              run_id: "{{job.run_id}}"
+              run_label: "{{job.parameters.run_label}}"
