@@ -1,0 +1,2 @@
+# Databricks pipeline export files are not supported in Git folders
+*.dbpipeline.json
